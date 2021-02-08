@@ -192,22 +192,22 @@
 				</tr>
 				<tr>
 					<td align="center">
-						<div class="btn btn-lg" onclick="getService(this)"><i class="fa fa-windows icon"></i>
+						<div class="btn btn-lg windows" data-services="0" onclick="getService(this)"><i class="fa fa-windows icon"></i>
 							<div class="time">&nbsp;</div>
 						</div>
 					</td>
 					<td align="center">
-						<div class="btn btn-lg" onclick="getService(this)"><i class="fa fa-check icon"></i>
+						<div class="btn btn-lg carpets" data-services="1" onclick="getService(this)"><i class="fa fa-check icon"></i>
 							<div class="time">&nbsp;</div>
 						</div>
 					</td>
 					<td align="center">
-						<div class="btn btn-lg" onclick="getService(this)"><i class="fa fa-user icon"></i>
+						<div class="btn btn-lg oven" data-services="2" onclick="getService(this)"><i class="fa fa-user icon"></i>
 							<div class="time">&nbsp;</div>
 						</div>
 					</td>
 					<td align="center">
-						<div class="btn btn-lg" onclick="getService(this)"><i class="fa fa-cogs icon"></i>
+						<div class="btn btn-lg ironing" data-services="3" onclick="getService(this)"><i class="fa fa-cogs icon"></i>
 							<div class="time">&nbsp;</div>
 						</div>
 					</td>
@@ -222,7 +222,7 @@
 		</div>
 		<div class="side-bar">
 			<div class="side-head">Enquiry Summary</div>
-			<div class="bar-item"><strong><i class="fa fa-check requested"></i> 7 Hours Requested</strong></div>
+			<div class="bar-item"><strong><i class="fa fa-check requested"></i> <span id="hours">0</span> Hours Requested</strong></div>
 			<div class="bar-item"><i class="fa fa-plus"></i> Bedrooms <span class="bedprice">0</span></div>
 			<div class="bar-item"><i class="fa fa-plus"></i> Bathrooms <span class="bathprice">0</span></div>
 			<div class="bar-item"></div>
@@ -247,26 +247,32 @@
 				x[i].classList.remove('active');
 			}
 		}
+		var hours = 0;
 
 		function bedroomPrice(roomCount) {
 			var value = '270';
 			switch(roomCount) {
 				case '1':
-					value = '270';
+					value = value;
+					hours = 1;
 				break;
 				case '2':
 					value = value * roomCount;
+					hours = 2;
 				break;
 				case '3':
 					value = value * roomCount;
+					hours = 2;
 				break;
 				case '4':
 					value = value * roomCount;
+					hours = 3;
 				break;
 				default:
 					value = '0.00';
 				break;
 			}
+			$('#hours').innerHTML = hours;
 			$('.bedprice').innerHTML = parseInt(value);
 			return parseInt(value);
 		}
@@ -275,58 +281,153 @@
 			var value = '180';
 			switch(roomCount) {
 				case '1':
-					value = '180';
+					value = value;
+					hours = parseInt($('#hours').innerHTML);
 				break;
 				case '2':
 					value = value * roomCount;
+					hours = parseInt($('#hours').innerHTML);
 				break;
 				case '3':
 					value = value * roomCount;
+					hours += 2;
 				break;
 				case '4':
 					value = value * roomCount;
+					hours += 2;
 				break;
 				default:
 					value = '0.00';
 				break;
 			}
+			$('#hours').innerHTML = hours;
 			$('.bathprice').innerHTML = parseInt(value);
 			return parseInt(value);
 		}
 
+		var x = document.getElementsByClassName('services');
+		function windowsPricing(count=5) {
+			var value = '60'; //60 per window
+			if(count > 0) {
+				value = value * count;
+			}
+			else {
+				value = 0;
+			}
+			x[0].innerHTML = parseInt(value);
+			$('#hours').innerHTML = 0;
+			hours += 2;
+			$('#hours').innerHTML = hours;
+			return value;
+		}
+
+		function carpetsPricing() {
+			value = '150';
+			// $('.services').innerHTML = parseInt(value);
+			x[1].innerHTML = parseInt(value);
+			$('#hours').innerHTML = 0;
+			hours += 2;
+			$('#hours').innerHTML = hours;
+			return value;
+		}
+		function ovenPricing() {
+			value = '200';
+			// $('.services').innerHTML = parseInt(value);
+			x[2].innerHTML = parseInt(value);
+			$('#hours').innerHTML = 0;
+			hours += 2;
+			$('#hours').innerHTML = hours;
+			return value;
+		}
+		function ironingPricing() {
+			value = '400';
+			// $('.services').innerHTML = parseInt(value);
+			x[3].innerHTML = parseInt(value);
+			$('#hours').innerHTML = 0;
+			hours += 2;
+			$('#hours').innerHTML = hours;
+			return value;
+		}
+		//
 		function getService(event) {
 			resetClass((event.classList.contains("bedrooms")) ? 'bedrooms' : 'bathrooms');
 			var roomCount = event.dataset.rooms;
 
+			//write pricing to screen
+			if(event.classList.contains("bedrooms")) {
+				bedroomPrice(roomCount)
+			}
+			else if(event.classList.contains("bathrooms")) {
+				bathroomPrice(roomCount);
+			}
+			else if(event.classList.contains("windows")) {
+				windowsPricing(5); //qty of minimum 5 windows
+			}
+			else if(event.classList.contains("carpets")){
+				carpetsPricing();
+			}
+			else if(event.classList.contains("oven")){
+				ovenPricing();
+			}
+			else if(event.classList.contains("ironing")){
+				ironingPricing();
+			}
+
 			if(event.classList.contains('btn-lg')) {
 				event.classList.toggle('active');
-				if(event.classList.contains('active')) {
+				if(event.classList.contains('active')) { //checked
 					event.children[0].setAttribute('class', 'fa fa-check icon');
 					event.children[1].innerHTML = '+02:00';
 				}
-				else {
+				else { //unchecked
 					event.children[0].setAttribute('class', 'fa fa-user icon');
 					event.children[1].innerHTML = '&nbsp;';
+					//reset amounts if uncheck service
+					var servicesIndex = event.dataset.services;
+					x[servicesIndex].innerHTML = 0;
+
+					$('#hours').innerHTML = 0;
+					newHours = (hours - 2);
+					hours = 0;
+					$('#hours').innerHTML = newHours;
 				}
 			} else {
 				event.classList.add('active');
 			}
-			(event.classList.contains("bedrooms")) ? bedroomPrice(roomCount) : bathroomPrice(roomCount);
-			calcPrice();
+
+			totalPrice(); //call total to display amount
 		}
 
-		function calcPrice() {
+		//
+		function calcPrices() {
 			var finalprice = 0;
-			var services = 0;
 			var bedroom = $('.bedprice').innerHTML;
 			var bathroom = $('.bathprice').innerHTML;
 
-			finalprice = parseInt(bedroom) + parseInt(bathroom);
-			$('.totalprice').innerHTML = 'R'+finalprice;
-			/*var x = document.querySelectorAll('.services');
-			//first element value
-			services = x[1].innerHTML;*/
+			// var services = 0;
+			/*var windows = $('.windows').innerHTML;
+			var carpets = $('.carpets').innerHTML;
+			var oven = 	  $('.oven').innerHTML;
+			var ironing = $('.ironing').innerHTML;*/
+
+			//finalprice = parseInt($('.totalprice').innerHTML);
+			finalprice += parseInt(bedroom); //+ parseInt(bathroom);
+			finalprice += parseInt(bathroom);
+			/*finalprice += parseInt(windows);
+			finalprice += parseInt(carpets);
+			finalprice += parseInt(oven);
+			finalprice += parseInt(ironing);*/
 			
+			//get all elements value
+			var x = document.querySelectorAll('.services');
+			for(var i=0; i < x.length; i++) {
+				finalprice += parseInt(x[i].innerHTML);
+			}
+			return parseInt(finalprice);
+		}
+		//
+		function totalPrice() {
+			$('.totalprice').innerHTML = calcPrices();
 		}
 
 
